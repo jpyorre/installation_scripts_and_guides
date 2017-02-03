@@ -1,0 +1,24 @@
+# Still in progress/testing:
+# This will enable encrypting all mail on a server, file by file. Each mail file is encrypted using a public key. The private key is used inside your email client to access and decrypt the email as it's viewed. This makes it so if your server is ever seized or compromised, all mail is secure.
+
+apt-get install gnupg
+adduser --shell /bin/false --home /var/opt/gpgit --disabled-password --disabled-login --gecos "" gpgit
+
+
+mkdir /var/opt/gpgit/.gnupg
+chown gpgit:gpgit /var/opt/gpgit/.gnupg
+chmod 700 /var/opt/gpgit/.gnupg
+# ORDER OF OPTIONS IMPORTANT!
+sudo echo "allow-non-selfsigned-uid" >> /var/opt/gpgit/.gnupg/gpg.conf
+sudo -u gpgit /usr/bin/gpg --homedir=/var/opt/gpgit/.gnupg --import pubkey.asc
+sudo -u gpgit /usr/bin/gpg --homedir=/var/opt/gpgit/.gnupg --list-keys
+# give ultimate trust (5) to the imported key
+sudo -u gpgit /usr/bin/gpg --homedir=/var/opt/gpgit/.gnupg --edit-key 7C473BE2 trust quit
+
+sudo mkdir /opt/gpgit && cd /opt/gpgit && 
+Download: https://gitlab.com/mikecardwell/gpgit/tree/master
+
+sudo cpan install -f Moo
+sudo cpan install -f App::cpanminus
+sudo cpan install -f GnuPG::Interface
+sudo cpan install -f Mail::GnuPG
