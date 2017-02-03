@@ -1,0 +1,3 @@
+install node and npm
+
+/usr/local/Cellar/node/7.0.0/libexec/npm/lib/node_modules/bower/bin/bower install bootstrap#3.2.0 jquery#2.1.1 d3#~3.3.13 nvd3#1.7.1 

@@ -1,0 +1,29 @@
+apt-get update && sudo apt-get install vim apache2 mysql-server php5-mysql php5 php5-gd libapache2-mod-php5 php5-mcrypt curl php5-curl -y
+
+
+mkdir /var/www/nextcloud
+# Download nextcloud into dir
+chown -R www-data:www-data /var/www/nextcloud/
+
+
+mysql -u root -p
+CREATE DATABASE nextcloud;
+GRANT ALL ON nextcloud.* to 'nextcloud'@'localhost' IDENTIFIED BY 'set_database_password';
+FLUSH PRIVILEGES;
+exit
+
+# Create apache config:
+Alias /nextcloud "/var/www/nextcloud/"
+
+<Directory /var/www/nextcloud/>
+    Options +FollowSymlinks
+    AllowOverride All
+
+    <IfModule mod_dav.c>
+        Dav off
+    </IfModule>
+
+    SetEnv HOME /var/www/nextcloud
+    SetEnv HTTP_HOME /var/www/nextcloud
+
+</Directory>

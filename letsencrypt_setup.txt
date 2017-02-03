@@ -1,0 +1,27 @@
+installed in /opt/letsencrypt
+
+Set up new site:
+./letsencrypt-auto --apache -d example.com
+
+New certificate will be added to:
+/etc/apache2/sites-enabled/default-ssl.conf
+
+But I'm using:
+/etc/apache2/sites-enabled/000-default.conf
+
+So go in there and add the lines for the correct location of the cert files, like this:
+SSLCertificateFile      /etc/letsencrypt/live/domain.com/fullchain.pem
+SSLCertificateKeyFile /etc/letsencrypt/live/domain.com/privkey.pem
+
+
+Set up cron job to check for renewal and then auto renew if needed every monday at 02:30:
+sudo crontab -e
+30 2 * * 1 /opt/letsencrypt/letsencrypt-auto renew >> /var/log/le-renew.log
+
+Update letsencrypt:
+    cd /opt/letsencrypt
+    sudo git pull
+
+instructions from:
+https://www.digitalocean.com/community/tutorials/how-to-secure-apache-with-let-s-encrypt-on-ubuntu-14-04
+usingletsencrypt.txt (END)

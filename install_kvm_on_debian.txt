@@ -1,0 +1,23 @@
+From https://wiki.debian.org/KVM#Introduction
+http://www.howtogeek.com/117635/how-to-install-kvm-and-create-virtual-machines-on-ubuntu/
+https://github.com/mistio/mist.io
+
+Install KVM
+KVM is a full virtualization solution for Linux on x86 (64-bit included) hardware containing virtualization extensions (Intel VT or AMD-V). 
+
+aptitude install qemu-kvm libvirt-bin
+
+In order to be able to manage virtual machines as regular user you should put this user into the kvm and libvirt groups: 
+
+adduser <youruser> kvm
+adduser <youruser> libvirt
+
+You should then be able to list your domains: 
+virsh list --all
+
+libvirt defaults to qemu:///session for non-root. So from <youruser> you'll need to do: 
+$ virsh --connect qemu:///system list --all
+
+
+Install webvirtmanager:
+$ sudo apt-get install git python-pip python-libvirt python-libxml2 novnc supervisor 

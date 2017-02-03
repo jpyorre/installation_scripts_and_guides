@@ -1,0 +1,82 @@
+Save the following as /tmp/vmnet-3.19.patch_ws10:
+
+diff -rupN vmnet-only/driver.c vmnet-only-modified/driver.c
+--- vmnet-only/driver.c 2015-01-17 09:25:58.000000000 +0800
++++ vmnet-only-modified/driver.c    2015-05-07 14:53:18.272218785 +0800
+@@ -265,10 +265,17 @@ LinuxDriver_Ioctl32_Handler(unsigned int
+ {
+    int ret = -ENOTTY;
+
++#if LINUX_VERSION_CODE < KERNEL_VERSION(3, 19, 0)
+    if (filp && filp->f_op && filp->f_op->ioctl == VNetFileOpIoctl) {
+       ret = VNetFileOpIoctl(filp->f_dentry->d_inode, filp, iocmd, ioarg);
+    }
+    return ret;
++#else 
++   if (filp && filp->f_op && filp->f_op->ioctl == VNetFileOpIoctl) {
++      ret = VNetFileOpIoctl(filp->f_path.dentry->d_inode, filp, iocmd, ioarg);
++   }
++   return ret;
++#endif
+ }
+
+
+@@ -1191,11 +1198,19 @@ VNetFileOpUnlockedIoctl(struct file    *
+    struct inode *inode = NULL;
+    long err;
+
++#if LINUX_VERSION_CODE < KERNEL_VERSION(3, 19, 0)
+    if (filp && filp->f_dentry) {
+       inode = filp->f_dentry->d_inode;
+    }
+    err = VNetFileOpIoctl(inode, filp, iocmd, ioarg);
+    return err;
++#else 
++   if (filp && filp->f_path.dentry) {
++      inode = filp->f_path.dentry->d_inode;
++   }
++   err = VNetFileOpIoctl(inode, filp, iocmd, ioarg);
++   return err;
++#endif
+ }
+ #endif
+
+diff -rupN vmnet-only/netif.c vmnet-only-modified/netif.c
+--- vmnet-only/netif.c  2015-01-17 09:25:58.000000000 +0800
++++ vmnet-only-modified/netif.c 2015-05-07 14:51:43.326885576 +0800
+@@ -149,7 +149,7 @@ VNetNetIf_Create(char *devName,  // IN:
+    memcpy(deviceName, devName, sizeof deviceName);
+    NULL_TERMINATE_STRING(deviceName);
+
+-   dev = alloc_netdev(sizeof *netIf, deviceName, VNetNetIfSetup);
++   dev = alloc_netdev(sizeof *netIf, deviceName, NET_NAME_UNKNOWN, VNetNetIfSetup);
+    if (!dev) {
+       retval = -ENOMEM;
+       goto out;
+diff -rupN vmnet-only/userif.c vmnet-only-modified/userif.c
+--- vmnet-only/userif.c 2015-01-17 09:25:58.000000000 +0800
++++ vmnet-only-modified/userif.c    2015-05-07 14:52:32.095595913 +0800
+@@ -523,7 +523,13 @@ VNetCopyDatagram(const struct sk_buff *s
+       .iov_base = buf,
+       .iov_len  = len,
+    };
++#if LINUX_VERSION_CODE < KERNEL_VERSION(3, 19, 0)
+    return skb_copy_datagram_iovec(skb, 0, &iov, len);
++#else
++   struct iov_iter to;
++   iov_iter_init(&to, READ, &iov, 1, len);
++   return skb_copy_datagram_iter(skb, 0, &to, len);
++#endif
+ }
+
+
+ Then run these commands:
+
+
+cd /usr/lib/vmware/modules/source
+tar -xf vmnet.tar
+patch -p0 -i /tmp/vmnet-3.19.patch_ws10
+mv vmnet.tar vmnet.tar.SAVED
+tar -cf vmnet.tar vmnet-only
+rm -r vmnet-only
+vmware-modconfig --console --install-all

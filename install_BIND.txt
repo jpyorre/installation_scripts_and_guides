@@ -1,0 +1,17 @@
+apt-get update && apt-get install bind9 bind9utils bind9-doc
+
+
+
+# If building a live DNS server
+# Above the existing options block, create a new ACL block called "trusted". This is where we will define list of clients that we will allow recursive DNS queries from (i.e. your servers that are in the same datacenter as ns1). Using our example private IP addresses, we will add ns1, ns2, host1, and host2 to our list of trusted clients:
+
+vim /etc/bind/named.conf.options
+
+Add (with the server IP's changed)
+
+acl "trusted" {
+        192.168.1.11;    # ns1 - can be set to localhost
+        192.168.1.12;    # ns2
+        192.168.100.101;  # host1
+        192.168.100.102;  # host2
+};

@@ -1,0 +1,38 @@
+sudo apt-get install ruby-full
+
+sudo mkdir /var/lib/gems
+sudo chown -R josh /var/lib/gems
+sudo chown -R josh /usr/local/bin/
+
+gem install --no-rdoc --no-ri jekyll
+
+
+passenger:
+sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 561F9B9CAC40B2F7
+sudo vim /etc/apt/sources.list.d/passenger.list
+deb https://oss-binaries.phusionpassenger.com/apt/passenger trusty main
+
+
+sudo chown root: /etc/apt/sources.list.d/passenger.list
+sudo chmod 600 /etc/apt/sources.list.d/passenger.list
+sudo apt-get update
+sudo apt-get install libapache2-mod-passenger
+
+sudo a2enmod passenger
+sudo service apache2 restart
+
+#This step will overwrite our Ruby version to an older one. To resolve this, simply remove the incorrect Ruby location and create a new symlink to the correct Ruby binary file:
+sudo rm /usr/bin/ruby
+sudo ln -s /usr/local/bin/ruby /usr/bin/ruby
+
+jekyll new test
+sudo jekyll build -d /var/www/html/
+service apache2 restart
+
+
+More info:
+https://christopherrung.com/tutorial/2015/05/07/apache-and-jekyll/
+http://jekyllthemes.org/
+http://pixyll.com/
+
+https://jekyllrb.com/docs/installation/
